@@ -1,0 +1,4 @@
+I want to create an image in Nano Banana or Reve AI using uploaded example but with my body composition and face. 
+This image should be in Vogue or Cosmopolitan style. Describe attached image with all details for this AIs as structured prompt. 
+Keep original facial features, expression, and proportions exactly the same. Do not stylize or morph the face.
+However: Make the skin fair, smooth, and flawless while keeping all natural facial details intact.
