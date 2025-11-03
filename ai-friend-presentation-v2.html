@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Искусственный Интеллект как подружка</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow: hidden;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 119, 230, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            animation: bgShift 20s ease infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 80px 60px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            z-index: 2;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+        }
+
+        h1 .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 50%, #fce7f3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1 .emoji, h2 .emoji {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: initial !important;
+            background-clip: unset !important;
+            color: inherit;
+            display: inline;
+            font-weight: normal;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 4rem);
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+        }
+
+        h2 .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 50%, #fce7f3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            line-height: 1.75;
+            max-width: 700px;
+            color: rgba(255, 255, 255, 0.88);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding: 30px 0;
+            max-width: 700px;
+        }
+
+        ul li {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+            margin: 20px 0;
+            padding: 20px 30px 20px 70px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            text-align: left;
+        }
+
+        ul li:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(10px);
+            border-color: rgba(167, 139, 250, 0.4);
+        }
+
+        /* Content containers */
+        .slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1400px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        /* QR Codes */
+        .qr-code {
+            width: 320px;
+            height: 320px;
+            margin: 40px 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        .qr-code:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 30px 80px rgba(167, 139, 250, 0.3);
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        /* Images */
+        .image-content {
+            max-width: 700px;
+            max-height: 600px;
+            margin: 40px 0;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .image-content:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 40px 100px rgba(167, 139, 250, 0.3);
+        }
+
+        .image-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            border-radius: 24px;
+        }
+
+        /* Two column layout */
+        .slide-with-image {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 80px;
+            max-width: 1400px;
+            padding: 0 80px;
+        }
+
+        .slide-with-image .text-content {
+            flex: 1;
+            text-align: left;
+            max-width: 600px;
+        }
+
+        .slide-with-image .text-content h2 {
+            text-align: left;
+            font-size: clamp(2.5rem, 4vw, 4rem);
+        }
+
+        .slide-with-image .text-content p {
+            font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+        }
+
+        .slide-with-image .image-content {
+            flex: 1;
+            max-width: 500px;
+            margin: 0;
+        }
+
+        /* Logo badges */
+        .logo-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .company-logo {
+            width: 140px;
+            height: 140px;
+            padding: 10px;
+            background: transparent;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .company-logo:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(167, 139, 250, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Timer */
+        .timer {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 700;
+            margin: 30px 0;
+            background: linear-gradient(135deg, #fce7f3 0%, #e9d5ff 50%, #ddd6fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Full image slides */
+        .full-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            max-height: 90vh;
+        }
+
+        /* Presentation timer */
+        .presentation-timer {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 1000;
+            color: rgba(255, 255, 255, 0.7);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 1000;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .slide-with-image {
+                flex-direction: column;
+                gap: 40px;
+                padding: 40px;
+            }
+
+            .slide-with-image .text-content {
+                text-align: center;
+            }
+
+            .slide-with-image .text-content h2 {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 30px;
+            }
+
+            .logo-container {
+                gap: 15px;
+            }
+
+            .company-logo {
+                width: 110px;
+                height: 110px;
+                padding: 8px;
+            }
+
+            .qr-code {
+                width: 280px;
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div class="presentation">
+        <!-- Слайд 1 -->
+        <div class="slide active" data-slide="1">
+            <h1><span class="gradient-text">Искусственный Интеллект как подружка</span> <span class="emoji">💅</span></h1>
+        </div>
+
+        <!-- Слайд 2 -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content slide-with-image">
+                <div class="text-content">
+                    <h2>Кто здесь?</h2>
+                    <p>Дмитрий Климкин - разработчик и специалист по ИИ, который помогает бизнесам работать умнее.</p>
+                    <div class="logo-container">
+                        <div class="company-logo">
+                            <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Westpac-logo.jpeg" alt="Westpac">
+                        </div>
+                        <div class="company-logo">
+                            <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Optus-logo.jpeg" alt="Optus">
+                        </div>
+                        <div class="company-logo">
+                            <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Pawmates-logo.jpg" alt="Pawmates">
+                        </div>
+                        <div class="company-logo">
+                            <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Dehancer-logo.png" alt="Dehancer">
+                        </div>
+                    </div>
+                </div>
+                <div class="image-content">
+                    <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Dmitry-Klimkin.png" alt="Dmitry Klimkin">
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 3 -->
+        <div class="slide" data-slide="3">
+            <h1><span class="gradient-text">О чем?</span> <span class="emoji">😳</span></h1>
+        </div>
+
+        <!-- Слайд 4 -->
+        <div class="slide" data-slide="4">
+            <h2><span class="gradient-text">О чем?</span> <span class="emoji">😳</span></h2>
+            <ul>
+                <li>👩‍⚕️ AI подруга - психолог</li>
+                <li>📸 Фотосессия дома</li>
+                <li>🏝️ Путешествие</li>
+            </ul>
+        </div>
+
+        <!-- Слайд 5 -->
+        <div class="slide" data-slide="5">
+            <h2>Где? Claude AI !</h2>
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/ClaudeAI.png" alt="QR Code">
+            </div>
+        </div>
+
+        <!-- Слайд 6 -->
+        <div class="slide" data-slide="6">
+            <h1>Как?</h1>
+        </div>
+
+        <!-- Слайд 7 -->
+        <div class="slide" data-slide="7">
+            <h1>Запрос > AI > Ответ</h1>
+        </div>
+
+        <!-- Слайд 8 -->
+        <div class="slide" data-slide="8">
+            <h1>Кто когда-нибудь ходил к психологу?</h1>
+        </div>
+
+        <!-- Слайд 9 -->
+        <div class="slide" data-slide="9">
+            <h1>А кто ХОТЕЛ пойти, но не пошел?</h1>
+        </div>
+
+        <!-- Слайд 10 -->
+        <div class="slide" data-slide="10">
+            <h2>Кот или ИИ подруга?</h2>
+            <div class="image-content">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Cat.png" alt="Cat">
+            </div>
+        </div>
+
+        <!-- Слайд 11 -->
+        <div class="slide" data-slide="11">
+            <h1>Сделаем из AI подругу - психолога!</h1>
+        </div>
+
+        <!-- Слайд 12 -->
+        <div class="slide" data-slide="12">
+            <h2><span class="gradient-text">Первое знакомство с ИИ подругой</span> <span class="emoji">💖</span></h2>
+            <h2><span class="gradient-text">Самооценка</span> <span class="emoji">🚀</span></h2>
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Mia%20and%20my%20confidence.png" alt="QR Code">
+            </div>
+        </div>
+
+        <!-- Слайд 13 -->
+        <div class="slide" data-slide="13">
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Mia%20and%20my%20confidence.png" alt="QR Code">
+            </div>
+            <div class="timer" id="timer">3:00</div>
+        </div>
+
+        <!-- Слайд 14 -->
+        <div class="slide" data-slide="14">
+            <h1>Как ощущения?</h1>
+        </div>
+
+        <!-- Слайд 15 -->
+        <div class="slide" data-slide="15">
+            <h1>Возможность копнуть глубже?</h1>
+        </div>
+
+        <!-- Слайд 16 -->
+        <div class="slide" data-slide="16">
+            <ul>
+                <li>Сложные ситуации и поддержка</li>
+                <li>Вопросы отношений</li>
+                <li>Карьера и самореализация</li>
+            </ul>
+        </div>
+
+        <!-- Слайд 17 -->
+        <div class="slide" data-slide="17">
+            <h1>Идем дальше!</h1>
+        </div>
+
+        <!-- Слайд 18 -->
+        <div class="slide" data-slide="18">
+            <h2>Фотосессия за 30 минут и Ты - звезда Vogue!</h2>
+            <div class="image-content">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Vogue.jpeg" alt="Vogue">
+            </div>
+        </div>
+
+        <!-- Слайд 19 -->
+        <div class="slide" data-slide="19">
+            <h2>Поиграем в Real or Fake?</h2>
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Fake%20or%20Real%20game.png" alt="QR Code">
+            </div>
+        </div>
+
+        <!-- Слайд 20 -->
+        <div class="slide" data-slide="20">
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Fake%20or%20Real%20game.png" alt="QR Code">
+            </div>
+            <div class="timer" id="timer2">1:00</div>
+        </div>
+
+        <!-- Слайд 21 -->
+        <div class="slide" data-slide="21">
+            <h2><span class="gradient-text">Фотостудия - Nano Banana</span> <span class="emoji">🍌</span></h2>
+        </div>
+
+        <!-- Слайд 22 -->
+        <div class="slide" data-slide="22">
+            <img class="full-image" src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Photoshoot%20Diagram.jpg" alt="Photoshoot Diagram">
+        </div>
+
+        <!-- Слайд 23 -->
+        <div class="slide" data-slide="23">
+            <h2>Референс с Pinterest</h2>
+            <div class="image-content">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Pinterest-reference-2.jpg" alt="Pinterest Reference">
+            </div>
+        </div>
+
+        <!-- Слайд 24 -->
+        <div class="slide" data-slide="24">
+            <h2>Демо</h2>
+            <p style="font-size: 2rem; margin-top: 30px;">💃 Кто хочет прямо сейчас стать моделью Vogue?</p>
+        </div>
+
+        <!-- Слайд 25 -->
+        <div class="slide" data-slide="25">
+            <h2>Бонус - Демо</h2>
+            <p style="font-size: 2rem; margin-top: 30px;">Примерим что-нибудь из онлайн магазина?</p>
+        </div>
+
+        <!-- Слайд 26 -->
+        <div class="slide" data-slide="26">
+            <h1>Идем дальше!</h1>
+        </div>
+
+        <!-- Слайд 27 -->
+        <div class="slide" data-slide="27">
+            <h1>БИЛЕТЫ В РАЙ!</h1>
+            <div class="image-content">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Island-with-palm-tree.jpg" alt="Island">
+            </div>
+        </div>
+
+        <!-- Слайд 28 -->
+        <div class="slide" data-slide="28">
+            <h2>Демо</h2>
+            <p style="font-size: 2rem; margin-top: 30px;">Планируем путешествие 🏝️</p>
+        </div>
+
+        <!-- Слайд 29 -->
+        <div class="slide" data-slide="29">
+            <h2>Бонус - Демо</h2>
+            <p style="font-size: 2rem; margin-top: 30px;">Ищем бюджетные билеты ✈️</p>
+        </div>
+
+        <!-- Слайд 30 -->
+        <div class="slide" data-slide="30">
+            <h2>В итоге!</h2>
+            <ul>
+                <li>✅ Подняли самооценку</li>
+                <li>✅ Сделали студийную фото</li>
+                <li>✅ Примерили новый лук</li>
+                <li>✅ Спланировали путешествие</li>
+            </ul>
+        </div>
+
+        <!-- Слайд 31 -->
+        <div class="slide" data-slide="31">
+            <h2>Синяя или Красная?</h2>
+            <div class="image-content">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/Red-pill-blue-pill.jpg" alt="Pills">
+            </div>
+        </div>
+
+        <!-- Слайд 32 -->
+        <div class="slide" data-slide="32">
+            <h2>Все промпты и инструкции</h2>
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/All%20Materials.png" alt="QR Code">
+            </div>
+        </div>
+
+        <!-- Слайд 33 -->
+        <div class="slide" data-slide="33">
+            <h2>Вопросы?</h2>
+            <div class="qr-code">
+                <img src="https://raw.githubusercontent.com/dev4jam/AI-friend-presentation/main/AI%20Jedi%20Channel.jpg" alt="QR Code">
+            </div>
+        </div>
+    </div>
+
+    <div class="presentation-timer">
+        <span id="presentation-time">00:00</span>
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">33</span>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 33;
+        let timerInterval = null;
+        let timer2Interval = null;
+        let presentationTimerInterval = null;
+        let presentationSeconds = 0;
+
+        // Общий таймер презентации
+        function startPresentationTimer() {
+            if (presentationTimerInterval) return; // Уже запущен
+            
+            presentationTimerInterval = setInterval(() => {
+                presentationSeconds++;
+                updatePresentationTimerDisplay();
+            }, 1000);
+        }
+
+        function stopPresentationTimer() {
+            if (presentationTimerInterval) {
+                clearInterval(presentationTimerInterval);
+                presentationTimerInterval = null;
+            }
+        }
+
+        function resetAndStartPresentationTimer() {
+            stopPresentationTimer();
+            presentationSeconds = 0;
+            updatePresentationTimerDisplay();
+            startPresentationTimer();
+        }
+
+        function updatePresentationTimerDisplay() {
+            const minutes = Math.floor(presentationSeconds / 60);
+            const seconds = presentationSeconds % 60;
+            document.getElementById('presentation-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Навигация
+        function goToSlide(slideNumber) {
+            if (slideNumber < 1 || slideNumber > totalSlides) return;
+            
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            const targetSlide = document.querySelector(`[data-slide="${slideNumber}"]`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                currentSlide = slideNumber;
+                
+                // Обновляем счетчик
+                document.getElementById('current-slide').textContent = slideNumber;
+                
+                // Управление общим таймером презентации
+                if (slideNumber === 1) {
+                    // На первом слайде таймер скрыт
+                    document.querySelector('.presentation-timer').style.display = 'none';
+                    stopPresentationTimer();
+                } else if (slideNumber === 2) {
+                    // На втором слайде таймер появляется и перезапускается
+                    document.querySelector('.presentation-timer').style.display = 'block';
+                    resetAndStartPresentationTimer();
+                } else {
+                    // На остальных слайдах таймер просто показан
+                    document.querySelector('.presentation-timer').style.display = 'block';
+                }
+                
+                // Специальная обработка для слайда 13 (таймер обратного отсчета 3 минуты)
+                if (slideNumber === 13) {
+                    startTimer();
+                } else {
+                    stopTimer();
+                }
+                
+                // Специальная обработка для слайда 20 (таймер обратного отсчета 1 минута)
+                if (slideNumber === 20) {
+                    startTimer2();
+                } else {
+                    stopTimer2();
+                }
+            }
+        }
+
+        function nextSlide() {
+            goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            goToSlide(currentSlide - 1);
+        }
+
+        // Обработка клавиатуры
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Таймер
+        function startTimer() {
+            stopTimer();
+            let timeLeft = 180; // 3 минуты
+            
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft > 0) {
+                    timeLeft--;
+                } else {
+                    stopTimer();
+                    // Автопереход на следующий слайд
+                    setTimeout(() => {
+                        nextSlide();
+                    }, 500);
+                }
+            }
+            
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Таймер 2 (1 минута на слайде 20)
+        function startTimer2() {
+            stopTimer2();
+            let timeLeft = 60; // 1 минута
+            
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer2').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft > 0) {
+                    timeLeft--;
+                } else {
+                    stopTimer2();
+                    // Автопереход на следующий слайд
+                    setTimeout(() => {
+                        nextSlide();
+                    }, 500);
+                }
+            }
+            
+            updateTimer();
+            timer2Interval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer2() {
+            if (timer2Interval) {
+                clearInterval(timer2Interval);
+                timer2Interval = null;
+            }
+        }
+
+        // Инициализация
+        goToSlide(1); // Таймер будет скрыт на первом слайде
+    </script>
+</body>
+</html>
